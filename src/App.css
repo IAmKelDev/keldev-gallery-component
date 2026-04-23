@@ -34,10 +34,11 @@
   border-radius: 0.15rem;
   border: 0.1rem solid #000000;
   margin-bottom: 0.3rem;
+  cursor: pointer;
 }
 
 .gallery-tile-description {
-  background-color: #00000088;
+  background-color: #15151599;
   grid-area: stack;
   z-index: 2;
   opacity: 0;
