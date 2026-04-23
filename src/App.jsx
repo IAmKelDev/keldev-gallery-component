@@ -90,6 +90,7 @@ function App() {
           itemSelector: '.gallery-tile',
           columnWidth: '.gallery-tile',
           percentPosition: true,
+          fitWidth: true,
           horizontalOrder: true,
           gutter: '.gallery-gutter',
           transitionDuration: '0.15s',
