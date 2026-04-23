@@ -49,15 +49,21 @@ function App() {
           <div key={`${i}-gutter`} className="gallery-gutter"></div>
           <div key={i} className="gallery-tile">
             <h2>{meta.title}</h2>
-            <p className="gallery-tile-description">{meta.description}</p>
-            <img 
-              className="gallery-tile-image"
-              srcSet={`
-                ${photosPrefix}${meta.derivatives[1].filename},
-                ${thumbHashToDataURL(Uint8Array.from(atob(meta.thumbhash), c => c.charCodeAt(0)))}
-                `}
-              alt={meta.title}
-            />
+            <div className="gallery-tile-content">
+              {meta.description && meta.description.length > 0 && <div className="gallery-tile-description">
+                <p>{meta.description}</p>
+              </div>}
+              <div className="gallery-tile-image-container">
+                <img 
+                  className="gallery-tile-image"
+                  srcSet={`
+                    ${photosPrefix}${meta.derivatives[1].filename},
+                    ${thumbHashToDataURL(Uint8Array.from(atob(meta.thumbhash), c => c.charCodeAt(0)))}
+                    `}
+                  alt={meta.title}
+                />
+              </div>
+            </div>
             <div className="gallery-tile-tags">
               {meta.tags.map(tag => <span key={tag} className="gallery-tile-tag"> {tag} </span>)}
             </div>
