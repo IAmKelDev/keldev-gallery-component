@@ -48,7 +48,7 @@ function App() {
           <>
           <div key={`${i}-gutter`} className="gallery-gutter"></div>
           <div key={i} className="gallery-tile">
-            <h2>{meta.title}</h2>
+            {meta.title && meta.title.length > 0 && <h3 className="gallery-tile-title">{meta.title}</h3>}
             <div className="gallery-tile-content">
               {meta.description && meta.description.length > 0 && <div className="gallery-tile-description">
                 <p>{meta.description}</p>
@@ -107,7 +107,6 @@ function App() {
     <div className="gallery" ref={galleryRef}>
       {galleryPreviews}
     </div>
-    <div>test!</div>
     </>
   );
 }

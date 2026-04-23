@@ -10,7 +10,7 @@
 }
 
 .gallery-tile {
-  width: 350px;
+  width: 500px;
   margin-bottom: 1rem;
   display: inline-block;
   text-align: left;
@@ -23,10 +23,9 @@
   width: 0.5rem;
 }
 
-.gallery-tile h2 {
-  margin-top: 0.1rem;
+.gallery-tile-title {
+  margin-top: 0.01rem;
   margin-bottom: 0.25rem;
-  text-align: center;
 }
 
 .gallery-tile-content {
