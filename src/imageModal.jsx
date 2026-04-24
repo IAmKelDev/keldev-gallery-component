@@ -35,14 +35,16 @@ export default function ImageModal({ meta, photosPrefix, onClose }) {
     };
   }, [fullSizeUrl]);
 
+  const catchClick = (e) => {e.stopPropagation()};
+
   return (
-    <div className="image-modal">
+    <div className="image-modal" onClick={onClose}>
       <div className="image-modal-content">
-        <div className="image-modal-main-content">
+        <div className="image-modal-main-content" onClick={catchClick}>
             {isLoading && <p>Loading…</p>}
             {fullSizeUrl && <img ref={imgRef} src={fullSizeUrl} alt="Image Modal" />}
         </div>
-        <div className="image-modal-info-card">
+        {!isLoading && <div className="image-modal-info-card" onClick={catchClick}>
           <h3 className="image-modal-info-card-title">{meta.title}</h3>
           <p className="image-modal-info-card-description">{meta.description}</p>
           <div className="image-modal-info-card-tags">
@@ -61,7 +63,7 @@ export default function ImageModal({ meta, photosPrefix, onClose }) {
               </a>
             )}
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );
