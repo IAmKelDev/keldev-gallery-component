@@ -20,6 +20,7 @@
   border: 0.1rem solid #000000;
   margin-bottom: 0.3rem;
   cursor: pointer;
+  min-height: 250px;
 }
 
 .gallery-tile-description {
@@ -28,6 +29,11 @@
   z-index: 2;
   opacity: 0;
   transition: opacity 0.15s ease-in-out;
+}
+
+.gallery-tile-description p {
+    max-height: 250px;
+    overflow: auto;
 }
 
 .gallery-tile-content:hover .gallery-tile-description {
