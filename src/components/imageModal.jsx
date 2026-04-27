@@ -3,10 +3,10 @@ import './imageModal.css';
 import { useEffect, useRef, useState } from 'react';
 import imagesLoaded from 'imagesloaded';
 
-export default function ImageModal({ meta, photosPrefix, onClose }) {
-  if (!meta) return null;
+export default function ImageModal({ photoMeta, photosPrefix, onClose }) {
+  if (!photoMeta) return null;
 
-  const fullSizeFilename = meta.derivatives?.[meta.derivatives.length - 1]?.filename;
+  const fullSizeFilename = photoMeta.derivatives?.[photoMeta.derivatives.length - 1]?.filename;
   const fullSizeUrl = fullSizeFilename ? `${photosPrefix}${fullSizeFilename}` : null;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -45,10 +45,10 @@ export default function ImageModal({ meta, photosPrefix, onClose }) {
             {fullSizeUrl && <img ref={imgRef} src={fullSizeUrl} alt="Image Modal" />}
         </div>
         {!isLoading && <div className="image-modal-info-card" onClick={catchClick}>
-          <h3 className="image-modal-info-card-title">{meta.title}</h3>
-          <p className="image-modal-info-card-description">{meta.description}</p>
+          <h3 className="image-modal-info-card-title">{photoMeta.title}</h3>
+          <p className="image-modal-info-card-description">{photoMeta.description}</p>
           <div className="image-modal-info-card-tags">
-            {meta.tags?.map((tag) => (
+            {photoMeta.tags?.map((tag) => (
               <span key={tag} className="gallery-tile-tag">
                 {' '}
                 {tag}{' '}
