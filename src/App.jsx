@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { thumbHashToDataURL } from 'thumbhash';
 import Masonry from 'masonry-layout';
 import imagesLoaded from 'imagesloaded';
-import ImageModal from './imageModal';
+import ImageModal from './components/imageModal';
+import fetchGalleryData from './lib/dataIO.jsx';
 
 function App() {
   const [galleryPreviews, setGalleryPreviews] = useState([]);
@@ -17,35 +18,12 @@ function App() {
   const photosPrefix = 'https://gallery.keldev.net/';
 
   useEffect(() => {
-    async function fetchGalleryData() {
+    async function buildGallery() {
       try {
 
-        let maxFetch = 20;
+        const photosMetas = await fetchGalleryData(manifestsPrefix);
 
-        const photosManifestResponse = await fetch(`${manifestsPrefix}photos/photos-manifest.json`);
-        const photosManifest = JSON.parse(await photosManifestResponse.text());
-
-        let fetched = 0;
-        let photosMetas = [];
-
-        const photosHeaderResponse = await fetch(`${manifestsPrefix}photos/photos_header.json`);
-        const photosHeader = JSON.parse(await photosHeaderResponse.text());
-        photosMetas = [...photosMetas, ...photosHeader.metas];
-
-        console.log(photosMetas);
-
-        fetched += photosManifest.header.count;
-
-        let pageIdx = 0;
-        while (fetched < maxFetch && pageIdx < photosManifest.pages.length) {
-          const pagePhotosResponse = await fetch(`${manifestsPrefix}photos/photos_page_${pageIdx}.json`);
-          const pagePhotos = JSON.parse(await pagePhotosResponse.text());
-          photosMetas = [...photosMetas, ...pagePhotos.metas];
-          fetched += pagePhotos.metas.length;
-          pageIdx++;
-        }
-
-        const previews = photosMetas.slice(0, maxFetch).map((meta, i) => (
+        const previews = photosMetas.map((meta, i) => (
 
           <>
           <div key={`${i}-gutter`} className="gallery-gutter"></div>
@@ -75,14 +53,14 @@ function App() {
 
         setGalleryPreviews(previews);
       } catch (err) {
-        setError(err.message);
+        setError("Error fetching gallery data: " + err.message);
         console.log(err);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchGalleryData();
+    buildGallery();
   }, []);
 
   useEffect(() => {
@@ -102,7 +80,7 @@ function App() {
   }, [galleryPreviews]);
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <>
