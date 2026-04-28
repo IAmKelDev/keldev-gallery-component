@@ -1,21 +1,21 @@
-import './App.css'
+import './Gallery.css'
 
 import { useState, useEffect, useRef } from 'react';
 import Masonry from 'masonry-layout';
 import imagesLoaded from 'imagesloaded';
-import ImageModal from './components/imageModal';
+import ImageModal from './components/imageModal.jsx';
 import fetchGalleryData from './lib/dataIO.jsx';
 import GalleryTile from './components/galleryTile.jsx';
 
-function App() {
+function Gallery({
+  manifestsPrefix,
+  photosPrefix
+}) {
   const [galleryPreviews, setGalleryPreviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const galleryRef = useRef(null);
   const [imageModalMeta, setImageModalMeta] = useState(null);
-
-  const manifestsPrefix = 'https://gallery.keldev.net/manifests/';
-  const photosPrefix = 'https://gallery.keldev.net/';
 
   useEffect(() => {
     async function buildGallery() {
@@ -73,4 +73,4 @@ function App() {
   );
 }
 
-export default App;
+export default Gallery;
