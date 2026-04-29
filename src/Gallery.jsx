@@ -50,7 +50,7 @@ function Gallery({
         const masonry = new Masonry(galleryRef.current, {
           itemSelector: '.gallery-tile',
           columnWidth: '.gallery-tile',
-          percentPosition: true,
+          percentPosition: false,
           fitWidth: true,
           horizontalOrder: true,
           gutter: '.gallery-gutter',

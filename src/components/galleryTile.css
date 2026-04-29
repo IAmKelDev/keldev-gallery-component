@@ -4,7 +4,7 @@
   display: inline-block;
   text-align: left;
   padding: 0.3rem;
-  background-color: #00000044;
+  background-color: #88888844;
   border-radius: 0.4rem;
 }
 
@@ -16,8 +16,6 @@
 .gallery-tile-content {
   display: grid;
   grid-template-areas: 'stack';
-  border-radius: 0.15rem;
-  border: 0.1rem solid #000000;
   margin-bottom: 0.3rem;
   cursor: pointer;
   min-height: 250px;
@@ -38,6 +36,7 @@
 
 .gallery-tile-content:hover .gallery-tile-description {
   opacity: 1;
+  color: white;
 }
 
 .gallery-tile-description p {
@@ -62,7 +61,7 @@
 
 .gallery-tile-tags {
   width: auto;
-  display: inline-block;
+  display: block;
   text-align: left;
   font-size: 0.75rem;
 }
@@ -70,11 +69,11 @@
 .gallery-tile-tag {
   display: inline-block;
   background-color: #042529;
-  margin: 0 0.25rem 0 0;
+  color: white;
+  margin: 0.05rem 0.25rem 0 0;
   padding: 0.3rem 0.5rem;
   padding-bottom: 0.5rem;
-  border-radius: 0.9rem;
-  border: 0.1rem solid #040a29;
+  border-radius: 0.4rem;
   text-align: center;
   vertical-align: middle;
 }

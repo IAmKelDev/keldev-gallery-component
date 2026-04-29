@@ -49,6 +49,8 @@
   background-color: #080808cc;
   border: 0.2rem solid #303030;
   border-radius: 0.1rem;
+  color: white;
+  overflow: auto;
 }
 
 .image-modal-info-card-title {
@@ -63,4 +65,27 @@
 .image-modal-info-card-options a {
   padding: 1rem;
   cursor: pointer;
+}
+
+.image-modal-info-card-options a:hover {
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 996px) {
+  .image-modal-content {
+    flex-direction: column;
+    padding-left: 0;
+  }
+
+  .image-modal-main-content img {
+    max-width: 90vw;
+    max-height: 60vh;
+  }
+
+  .image-modal-info-card {
+    max-width: 90vw;
+    max-height: 40vh;
+    margin-top: 1vh;
+    padding: 0.25rem;
+  }
 }
