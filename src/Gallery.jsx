@@ -15,6 +15,7 @@ function Gallery({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const galleryRef = useRef(null);
+  const masonryRef = useRef(null);
   const [imageModalMeta, setImageModalMeta] = useState(null);
 
   useEffect(() => {
@@ -45,19 +46,26 @@ function Gallery({
   }, []);
 
   useEffect(() => {
-    if (galleryRef.current && galleryPreviews.length > 0) {
-      imagesLoaded(galleryRef.current, function() {
-        const masonry = new Masonry(galleryRef.current, {
-          itemSelector: '.gallery-tile',
-          columnWidth: '.gallery-tile',
-          percentPosition: false,
-          fitWidth: true,
-          horizontalOrder: true,
-          gutter: '.gallery-gutter',
-          transitionDuration: '0.15s',
-        });
+    if (!galleryRef.current || galleryPreviews.length === 0) return;
+
+    imagesLoaded(galleryRef.current, function() {
+      masonryRef.current = new Masonry(galleryRef.current, {
+        itemSelector: '.gallery-tile',
+        columnWidth: '.gallery-tile',
+        percentPosition: false,
+        fitWidth: true,
+        horizontalOrder: true,
+        gutter: '.gallery-gutter',
+        transitionDuration: '0.15s',
       });
-    }
+    });
+
+    const ro = new ResizeObserver(() => {
+      masonryRef.current?.layout();
+    });
+    ro.observe(galleryRef.current);
+
+    return () => ro.disconnect();
   }, [galleryPreviews]);
 
   if (loading) return <div>Loading...</div>;
