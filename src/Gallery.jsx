@@ -8,7 +8,7 @@ import fetchGalleryData from './lib/dataIO.jsx';
 import GalleryTile from './components/galleryTile.jsx';
 
 function Gallery({
-  manifestsPrefix,
+  apiPrefix,
   photosPrefix
 }) {
   const [galleryPreviews, setGalleryPreviews] = useState([]);
@@ -22,7 +22,7 @@ function Gallery({
     async function buildGallery() {
       try {
 
-        const photosMetas = await fetchGalleryData(manifestsPrefix);
+        const photosMetas = await fetchGalleryData(apiPrefix);
 
         const previews = photosMetas.map((meta, i) => (
           <GalleryTile

@@ -6,7 +6,7 @@ import Gallery from './Gallery.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Gallery
-      manifestsPrefix={'https://gallery.keldev.net/manifests/'}
+      apiPrefix={'https://api.keldev.net/gallery/'}
       photosPrefix={'https://gallery.keldev.net/'}
     />
   </StrictMode>,

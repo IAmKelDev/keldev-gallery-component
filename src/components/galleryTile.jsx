@@ -11,7 +11,7 @@ export default function GalleryTile({ photoMeta, idx, onClickContent, photosPref
         <div className="gallery-tile-content" onClick={onClickContent}>
             <div className="gallery-tile-description">
                 <p>{photoMeta.description}</p>
-                <p>{new Date(photoMeta.dateTime.year, photoMeta.dateTime.month - 1, photoMeta.dateTime.day, photoMeta.dateTime.hour, photoMeta.dateTime.minute, photoMeta.dateTime.second).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'})}</p>
+                <p>{new Date(photoMeta.taken_at).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'})}</p>
             </div>
             <div className="gallery-tile-image-container">
                 <img 

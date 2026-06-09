@@ -47,7 +47,7 @@ export default function ImageModal({ photoMeta, photosPrefix, onClose }) {
         {!isLoading && <div className="image-modal-info-card" onClick={catchClick}>
           <h3 className="image-modal-info-card-title">{photoMeta.title}</h3>
           <p className="image-modal-info-card-description">{photoMeta.description}</p>
-          <p className="image-modal-info-card-description"> {new Date(photoMeta.dateTime.year, photoMeta.dateTime.month - 1, photoMeta.dateTime.day, photoMeta.dateTime.hour, photoMeta.dateTime.minute, photoMeta.dateTime.second).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'})}</p>
+          <p className="image-modal-info-card-description"> {new Date(photoMeta.taken_at).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'})}</p>
           <div className="image-modal-info-card-tags">
             {photoMeta.tags?.map((tag) => (
               <span key={tag} className="gallery-tile-tag">
