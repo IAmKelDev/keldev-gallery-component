@@ -10,6 +10,7 @@ export default function ImageModal({ photoMeta, photosPrefix, onClose }) {
   const fullSizeUrl = fullSizeFilename ? `${photosPrefix}${fullSizeFilename}` : null;
 
   const [isLoading, setIsLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
   const imgRef = useRef(null);
 
   useEffect(() => {
@@ -37,6 +38,14 @@ export default function ImageModal({ photoMeta, photosPrefix, onClose }) {
 
   const catchClick = (e) => {e.stopPropagation()};
 
+  const copyLink = () => {
+    const url = `${window.location.origin}${window.location.pathname}?photo=${photoMeta.id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1000);
+    });
+  };
+
   return (
     <div className="image-modal" onClick={onClose}>
       <div className="image-modal-content">
@@ -58,6 +67,7 @@ export default function ImageModal({ photoMeta, photosPrefix, onClose }) {
           </div>
           <div className="image-modal-info-card-options">
             <a onClick={onClose}>Close</a>
+            <a onClick={copyLink}>{copied ? 'Copied!' : 'Copy Link'}</a>
             {fullSizeUrl && (
               <a href={fullSizeUrl} target="_blank" rel="noreferrer">
                 Open Full Size

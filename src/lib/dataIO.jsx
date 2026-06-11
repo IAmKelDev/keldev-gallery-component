@@ -17,3 +17,10 @@ export default async function fetchGalleryData(
         throw err;
       }
 }
+
+export async function fetchPhotoById(apiPrefix, id) {
+    const response = await fetch(`${apiPrefix}images?id=${encodeURIComponent(id)}`);
+    if (!response.ok) return null;
+    const json = await response.json();
+    return json?.image ?? null;
+}

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Masonry from 'masonry-layout';
 import imagesLoaded from 'imagesloaded';
 import ImageModal from './components/imageModal.jsx';
-import fetchGalleryData from './lib/dataIO.jsx';
+import fetchGalleryData, { fetchPhotoById } from './lib/dataIO.jsx';
 import GalleryTile from './components/galleryTile.jsx';
 
 function Gallery({
@@ -17,11 +17,11 @@ function Gallery({
   const galleryRef = useRef(null);
   const masonryRef = useRef(null);
   const [imageModalMeta, setImageModalMeta] = useState(null);
+  const skipUrlSync = useRef(true);
 
   useEffect(() => {
     async function buildGallery() {
       try {
-
         const photosMetas = await fetchGalleryData(apiPrefix);
 
         const previews = photosMetas.map((meta, i) => (
@@ -34,6 +34,18 @@ function Gallery({
         ));
 
         setGalleryPreviews(previews);
+
+        const selectedId = new URLSearchParams(window.location.search).get('photo');
+        if (selectedId) {
+          const match = photosMetas.find(m => m.id === selectedId);
+          if (match) {
+            setImageModalMeta(match);
+          } else {
+            const fetched = await fetchPhotoById(apiPrefix, selectedId);
+            if (fetched) setImageModalMeta(fetched);
+            else history.replaceState(null, '', window.location.pathname);
+          }
+        }
       } catch (err) {
         setError("Error fetching gallery data: " + err.message);
         console.log(err);
@@ -44,6 +56,18 @@ function Gallery({
 
     buildGallery();
   }, []);
+
+  useEffect(() => {
+    if (skipUrlSync.current) {
+      skipUrlSync.current = false;
+      return;
+    }
+    if (imageModalMeta) {
+      history.replaceState(null, '', `${window.location.pathname}?photo=${imageModalMeta.id}`);
+    } else {
+      history.replaceState(null, '', window.location.pathname);
+    }
+  }, [imageModalMeta]);
 
   useEffect(() => {
     if (!galleryRef.current || galleryPreviews.length === 0) return;
