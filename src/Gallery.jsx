@@ -18,6 +18,8 @@ function Gallery({
   const masonryRef = useRef(null);
   const [imageModalMeta, setImageModalMeta] = useState(null);
   const skipUrlSync = useRef(true);
+  const [pageCursor, setPageCursor] = useState(1);
+  const [moreToLoad, setMoreToLoad] = useState(true);
 
   useEffect(() => {
     async function buildGallery() {
@@ -56,6 +58,34 @@ function Gallery({
 
     buildGallery();
   }, []);
+
+  useEffect(() => {
+    async function loadNewPage() {
+      try {
+        const newPhotosMetas = await fetchGalleryData(apiPrefix, pageCursor);
+        const newPreviews = newPhotosMetas.map((meta, i) => (
+          <GalleryTile
+            photoMeta = {meta}
+            idx = {i}
+            onClickContent = {() => setImageModalMeta(meta)}
+            photosPrefix = {photosPrefix}
+          />
+        ));
+
+        if(newPreviews.length > 0) {
+          setGalleryPreviews((prev) => [...prev, ...newPreviews]);
+        }
+        else {
+          setMoreToLoad(false);
+        }
+        
+      } catch (err) {
+        console.log("Error adding page to gallery", err);
+      }
+    }
+
+    if (pageCursor > 1) loadNewPage();
+  }, [pageCursor])
 
   useEffect(() => {
     if (skipUrlSync.current) {
@@ -101,6 +131,7 @@ function Gallery({
     <div className="gallery" ref={galleryRef}>
       {galleryPreviews}
     </div>
+    {moreToLoad && <button className="button button--primary" onClick={() => setPageCursor((prev) => prev + 1)}>Load More</button>}
     </>
   );
 }
