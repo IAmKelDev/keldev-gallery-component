@@ -133,6 +133,7 @@ function Gallery({
 
     const galleryTiles = Array.from(galleryRef.current.querySelectorAll('.gallery-tile'));
     const tilesAddedCount = galleryTiles.length - masonryKnownGalleryTiles.current.length;
+    const firstKnownTile = masonryKnownGalleryTiles.current[0]; //For scroll adjustment on prepend
 
     if (masonryKnownGalleryTiles.current.length === 0) {
 
@@ -163,19 +164,31 @@ function Gallery({
 
       imagesLoaded(newTiles, function() {
         if (tilesPrepended) {
-          // console.log("Prepended! ", newTiles);
-          masonryRef.current?.prepended(newTiles);
-        } else {
-          // console.log("Appended!", newTiles);
-          masonryRef.current?.appended(newTiles);
-        }
-        masonryRef.current?.layout();
-      });
+          //Prepend pushes current items down. Compensate by scrolling the first pre-existing item back to where it was
+          const firstKnownMasonryItem = masonryRef.current?.items?.find(i => i.element === firstKnownTile);
+          const prevY = firstKnownMasonryItem?.position?.y;
+          
+          //Make the prepend instant so that animations don't clash with scroll adjustment
+          const oldTransition = masonryRef.current?.options?.transitionDuration;
+          masonryRef.current.options.transitionDuration = 0;
 
-      masonryKnownGalleryTiles.current = [...galleryTiles];
+          masonryRef.current?.prepended(newTiles);
+          masonryRef.current?.layout();
+
+          masonryRef.current.options.transitionDuration = oldTransition;
+
+          const newY = firstKnownMasonryItem?.position?.y;
+          if(prevY != null && newY != null) {
+            window.scrollBy({top: newY - prevY, behavior: 'instant'});
+          }
+        } else {
+          masonryRef.current?.appended(newTiles);
+          masonryRef.current?.layout();
+        }
+      });
     }
 
-    masonryKnownGalleryTiles.current = galleryTiles;
+    masonryKnownGalleryTiles.current = [...galleryTiles];
 
   }, [galleryMetas, localPageLowerBound, localPageUpperBound]);
 
