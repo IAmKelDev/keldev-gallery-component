@@ -9,10 +9,9 @@ import GalleryTile from './components/galleryTile.jsx';
 
 function Gallery({
   apiPrefix,
-  photosPrefix
+  photosPrefix,
+  localPageSize = 20
 }) {
-
-  const localPageSize = 4;
 
   const [galleryMetas, setGalleryMetas] = useState([]);
   const [minDBPageNum, setMinDBPageNum] = useState(0); //Lowest page number that has been fetched
@@ -136,6 +135,7 @@ function Gallery({
     const firstKnownTile = masonryKnownGalleryTiles.current[0]; //For scroll adjustment on prepend
 
     if (masonryKnownGalleryTiles.current.length === 0) {
+      //Init. Set up masonry ref object and the resize observer.
 
       masonryRef.current?.destroy();
       resizeObserverRef.current?.disconnect();
@@ -155,6 +155,13 @@ function Gallery({
           masonryRef.current?.layout();
         });
         resizeObserverRef.current.observe(galleryRef.current);
+
+        //On init, if there's a selected image scroll it into view.
+        //This is here because it needs to wait for images to load and layout to finish.
+        const selectedId = new URLSearchParams(window.location.search).get('photo');
+        if (selectedId) {
+          document.querySelector(`[data-photo-id="${selectedId}"`)?.scrollIntoView({block: 'center', behavior: 'instant'});
+        }
       });
     }
     else if (tilesAddedCount > 0) {

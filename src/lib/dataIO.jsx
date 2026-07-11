@@ -5,7 +5,7 @@ export default async function fetchGalleryPage(
 )
 {
     try {
-        console.log("Fetching page. Number = ", pageNumber, " Photo ID = ", photoId);
+        // console.log("Fetching page. Number = ", pageNumber, " Photo ID = ", photoId);
         const requestUrl = photoId ? `${apiPrefix}images?pageof=${photoId}` : `${apiPrefix}images?page=${pageNumber}`;
         const photosManifestResponse = await fetch(requestUrl);
         const responseJSON = await photosManifestResponse.json();
