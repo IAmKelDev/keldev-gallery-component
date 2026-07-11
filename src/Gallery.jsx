@@ -4,88 +4,117 @@ import { useState, useEffect, useRef } from 'react';
 import Masonry from 'masonry-layout';
 import imagesLoaded from 'imagesloaded';
 import ImageModal from './components/imageModal.jsx';
-import fetchGalleryData, { fetchPhotoById } from './lib/dataIO.jsx';
+import fetchGalleryPage from './lib/dataIO.jsx';
 import GalleryTile from './components/galleryTile.jsx';
 
 function Gallery({
   apiPrefix,
   photosPrefix
 }) {
-  const [galleryPreviews, setGalleryPreviews] = useState([]);
+
+  const localPageSize = 4;
+
+  const [galleryMetas, setGalleryMetas] = useState([]);
+  const [minDBPageNum, setMinDBPageNum] = useState(0); //Lowest page number that has been fetched
+  const [maxDBPageNum, setMaxDBPageNum] = useState(0); //Highest page number that has been fetched
+  const [dbHasMore, setDbHasMore] = useState(true);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const galleryRef = useRef(null);
   const masonryRef = useRef(null);
   const [imageModalMeta, setImageModalMeta] = useState(null);
   const skipUrlSync = useRef(true);
-  const [pageCursor, setPageCursor] = useState(1);
-  const [moreToLoad, setMoreToLoad] = useState(true);
+  const [localPageUpperBound, setLocalPageUpperBound] = useState(null);
+  const [localPageLowerBound, setLocalPageLowerBound] = useState(null);
+  const masonryKnownGalleryTiles = useRef([]);
+  const resizeObserverRef = useRef(null);
 
   useEffect(() => {
-    async function buildGallery() {
+
+    async function openPhotoFromUrl() {
       try {
-        const photosMetas = await fetchGalleryData(apiPrefix);
-
-        const previews = photosMetas.map((meta, i) => (
-          <GalleryTile
-            photoMeta = {meta}
-            idx = {i}
-            onClickContent = {() => setImageModalMeta(meta)}
-            photosPrefix = {photosPrefix}
-          />
-        ));
-
-        setGalleryPreviews(previews);
-
         const selectedId = new URLSearchParams(window.location.search).get('photo');
         if (selectedId) {
-          const match = photosMetas.find(m => m.id === selectedId);
+          const match = galleryMetas.find(m => m.id === selectedId);
           if (match) {
             setImageModalMeta(match);
           } else {
-            const fetched = await fetchPhotoById(apiPrefix, selectedId);
-            if (fetched) setImageModalMeta(fetched);
-            else history.replaceState(null, '', window.location.pathname);
+            const fetchResults = await fetchGalleryPage(apiPrefix, 0, selectedId);
+            // console.log(fetchResults);
+            if(fetchResults.photos.length > 0) {
+              const indexOfSelected = fetchResults.photos.findIndex(m => m.id === selectedId);
+              setImageModalMeta(fetchResults.photos[indexOfSelected]);
+              setGalleryMetas([...fetchResults.photos]);
+              setMaxDBPageNum(fetchResults.pageNum);
+              setMinDBPageNum(fetchResults.pageNum);
+              const lowerBound = Math.min(indexOfSelected, Math.max(0, fetchResults.photos.length - localPageSize));
+              setLocalPageLowerBound(lowerBound);
+              setLocalPageUpperBound(lowerBound + localPageSize);
+              setDbHasMore(fetchResults.hasMore);
+
+              return true; //Indicate that a page was fetched
+            } else {
+              history.replaceState(null, '', window.location.pathname);
+            }
           }
         }
       } catch (err) {
+        console.log("Error opening photo from URL: ", err.message);
+      } finally {
+        setLoading(false);
+      }
+
+      return false; //Indicate that no page was fetched
+    }
+
+    openPhotoFromUrl().then((pageWasFetched) => {
+      if(!pageWasFetched) {
+        //Trigger the fetchPageFromDb effect to fetch the first page of data
+        setLocalPageLowerBound(0);
+        setLocalPageUpperBound(localPageSize);
+      }
+    })
+
+
+  }, []);
+  
+  useEffect(() => {
+    async function fetchPageFromDb(nextPage = true) {
+      try {
+
+        if(nextPage) {
+          const fetchResults = await fetchGalleryPage(apiPrefix, maxDBPageNum + 1);
+          if(fetchResults.pageNum > maxDBPageNum) setMaxDBPageNum(fetchResults.pageNum);
+          setDbHasMore(fetchResults.hasMore);
+          setGalleryMetas((prev) => [...prev, ...fetchResults.photos]);
+        }
+        else {
+          const fetchResults = await fetchGalleryPage(apiPrefix, minDBPageNum - 1);
+          if(fetchResults.pageNum < minDBPageNum) setMinDBPageNum(fetchResults.pageNum);
+          setGalleryMetas((prev) => [...fetchResults.photos, ...prev]);
+          setLocalPageLowerBound((prev) => prev + fetchResults.photos.length);
+          setLocalPageUpperBound((prev) => prev + fetchResults.photos.length);
+        }
+
+      } catch (err) {
+        console.log("Error fetching gallery data: ", err);
         setError("Error fetching gallery data: " + err.message);
-        console.log(err);
       } finally {
         setLoading(false);
       }
     }
 
-    buildGallery();
-  }, []);
-
-  useEffect(() => {
-    async function loadNewPage() {
-      try {
-        const newPhotosMetas = await fetchGalleryData(apiPrefix, pageCursor);
-        const newPreviews = newPhotosMetas.map((meta, i) => (
-          <GalleryTile
-            photoMeta = {meta}
-            idx = {i}
-            onClickContent = {() => setImageModalMeta(meta)}
-            photosPrefix = {photosPrefix}
-          />
-        ));
-
-        if(newPreviews.length > 0) {
-          setGalleryPreviews((prev) => [...prev, ...newPreviews]);
-        }
-        else {
-          setMoreToLoad(false);
-        }
-        
-      } catch (err) {
-        console.log("Error adding page to gallery", err);
+    if(localPageLowerBound !== null && localPageUpperBound !== null) {
+      if(galleryMetas.length <= localPageUpperBound && dbHasMore) {
+        fetchPageFromDb();
+      }
+      if(localPageLowerBound < 0 && minDBPageNum > 1) {
+        fetchPageFromDb(false);
       }
     }
-
-    if (pageCursor > 1) loadNewPage();
-  }, [pageCursor])
+      
+  }, [localPageLowerBound, localPageUpperBound])
 
   useEffect(() => {
     if (skipUrlSync.current) {
@@ -100,27 +129,55 @@ function Gallery({
   }, [imageModalMeta]);
 
   useEffect(() => {
-    if (!galleryRef.current || galleryPreviews.length === 0) return;
+    if (!galleryRef.current || galleryMetas.length === 0) return;
 
-    imagesLoaded(galleryRef.current, function() {
+    const galleryTiles = Array.from(galleryRef.current.querySelectorAll('.gallery-tile'));
+    const tilesAddedCount = galleryTiles.length - masonryKnownGalleryTiles.current.length;
+
+    if (masonryKnownGalleryTiles.current.length === 0) {
+
+      masonryRef.current?.destroy();
+      resizeObserverRef.current?.disconnect();
       masonryRef.current = new Masonry(galleryRef.current, {
-        itemSelector: '.gallery-tile',
-        columnWidth: '.gallery-tile',
-        percentPosition: false,
-        fitWidth: true,
-        horizontalOrder: true,
-        gutter: '.gallery-gutter',
-        transitionDuration: '0.15s',
+          itemSelector: '.gallery-tile',
+          columnWidth: '.gallery-tile',
+          percentPosition: false,
+          fitWidth: true,
+          horizontalOrder: true,
+          gutter: '.gallery-gutter',
+          transitionDuration: '0.15s',
+        });
+      imagesLoaded(galleryRef.current, function() {
+        masonryRef.current?.layout();
+
+        resizeObserverRef.current = new ResizeObserver(() => {
+          masonryRef.current?.layout();
+        });
+        resizeObserverRef.current.observe(galleryRef.current);
       });
-    });
+    }
+    else if (tilesAddedCount > 0) {
 
-    const ro = new ResizeObserver(() => {
-      masonryRef.current?.layout();
-    });
-    ro.observe(galleryRef.current);
+      const tilesPrepended = galleryTiles[0] !== masonryKnownGalleryTiles.current[0];
+      const newTiles = tilesPrepended ? galleryTiles.slice(0, tilesAddedCount) : galleryTiles.slice(-tilesAddedCount);
 
-    return () => ro.disconnect();
-  }, [galleryPreviews]);
+      imagesLoaded(newTiles, function() {
+        if (tilesPrepended) {
+          // console.log("Prepended! ", newTiles);
+          masonryRef.current?.prepended(newTiles);
+        } else {
+          // console.log("Appended!", newTiles);
+          masonryRef.current?.appended(newTiles);
+        }
+        masonryRef.current?.layout();
+      });
+
+      masonryKnownGalleryTiles.current = [...galleryTiles];
+    }
+
+    masonryKnownGalleryTiles.current = galleryTiles;
+
+  }, [galleryMetas, localPageLowerBound, localPageUpperBound]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -128,10 +185,18 @@ function Gallery({
   return (
     <>
     <ImageModal photoMeta={imageModalMeta} photosPrefix={photosPrefix} onClose={() => setImageModalMeta(null)} />
+    {(minDBPageNum > 1 || localPageLowerBound > 0) && <button className="button button--primary" onClick={() => setLocalPageLowerBound((prev) => prev - localPageSize)}>More Pics</button>}
     <div className="gallery" ref={galleryRef}>
-      {galleryPreviews}
+      {galleryMetas.slice(Math.max(0, localPageLowerBound), localPageUpperBound).map((meta, i) => (
+        <GalleryTile
+            key={meta.id}
+            photoMeta = {meta}
+            onClickContent = {() => setImageModalMeta(meta)}
+            photosPrefix = {photosPrefix}
+          />
+        ))}
     </div>
-    {moreToLoad && <button className="button button--primary" onClick={() => setPageCursor((prev) => prev + 1)}>Load More</button>}
+    {(dbHasMore || localPageUpperBound < galleryMetas.length) && <button className="button button--primary" onClick={() => setLocalPageUpperBound((prev) => prev + localPageSize)}>More Pics</button>}
     </>
   );
 }

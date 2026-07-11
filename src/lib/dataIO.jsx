@@ -1,25 +1,26 @@
-export default async function fetchGalleryData(
+export default async function fetchGalleryPage(
     apiPrefix,
-    pageCursor = 0,
-    pagesToRetrieve = 1,  //Currently unused
+    pageNumber = 0,
+    photoId = null //Optional, fetch page containing the photo with this ID (if given pageCursor is ignored)
 )
 {
     try {
-        const photosManifestResponse = await fetch(`${apiPrefix}images?page=${pageCursor}`);
+        console.log("Fetching page. Number = ", pageNumber, " Photo ID = ", photoId);
+        const requestUrl = photoId ? `${apiPrefix}images?pageof=${photoId}` : `${apiPrefix}images?page=${pageNumber}`;
+        const photosManifestResponse = await fetch(requestUrl);
         const responseJSON = await photosManifestResponse.json();
 
         const photosMetas = responseJSON?.images || [];
+        const pageNum = responseJSON?.pageNum ?? -1;
+        const hasMore = responseJSON?.hasMore ?? false;
 
-        return photosMetas;
+        if (photoId && photosMetas.length === 0) {
+            throw new Error(`Photo with ID ${photoId} not found.`);
+        }
+
+        return { photos: photosMetas, pageNum, hasMore };
 
       } catch (err) {
         throw err;
       }
-}
-
-export async function fetchPhotoById(apiPrefix, id) {
-    const response = await fetch(`${apiPrefix}images?id=${encodeURIComponent(id)}`);
-    if (!response.ok) return null;
-    const json = await response.json();
-    return json?.image ?? null;
 }
