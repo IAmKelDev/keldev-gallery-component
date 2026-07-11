@@ -2,11 +2,11 @@ import { thumbHashToDataURL } from 'thumbhash';
 import './galleryTile.css';
 
 
-export default function GalleryTile({ photoMeta, idx, onClickContent, photosPrefix}) {
+export default function GalleryTile({ photoMeta, onClickContent, photosPrefix}) {
     return (
         <>
-        <div key={`${idx}-gutter`} className="gallery-gutter"></div>
-        <div key={idx} className="gallery-tile">
+        <div className="gallery-gutter"></div>
+        <div className="gallery-tile" data-photo-id={photoMeta.id}>
         {photoMeta.title && photoMeta.title.length > 0 && <h3 className="gallery-tile-title">{photoMeta.title}</h3>}
         <div className="gallery-tile-content" onClick={onClickContent}>
             <div className="gallery-tile-description">
