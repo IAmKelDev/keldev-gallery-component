@@ -58,6 +58,7 @@ export default function ImageModal({ photoMeta, photosPrefix, onClose }) {
           <p className="image-modal-info-card-description">{photoMeta.description}</p>
           <p className="image-modal-info-card-description">{new Date(photoMeta.taken_at).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'})}</p>
           <p className="image-modal-info-card-description">{`Score: ${photoMeta.score}`}</p>
+          <p className="image-modal-info-card-description">{photoMeta.author}</p>
           <div className="image-modal-info-card-tags">
             {photoMeta.tags?.map((tag) => (
               <span key={tag} className="gallery-tile-tag">

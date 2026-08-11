@@ -24,6 +24,7 @@ export default function GalleryTile({ photoMeta, onClickContent, photosPrefix}) 
                 <p>{photoMeta.description}</p>
                 <p>{new Date(photoMeta.taken_at).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'})}</p>
                 <p>{`Score: ${photoMeta.score}`}</p>
+                <p>{photoMeta.author}</p>
             </div>
             <div className="gallery-tile-image-container">
                 <img 
