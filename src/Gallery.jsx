@@ -2,7 +2,6 @@ import './Gallery.css'
 
 import { useState, useEffect, useRef } from 'react';
 import Masonry from 'masonry-layout';
-import imagesLoaded from 'imagesloaded';
 import ImageModal from './components/imageModal.jsx';
 import fetchGalleryPage from './lib/dataIO.jsx';
 import GalleryTile from './components/galleryTile.jsx';
@@ -140,59 +139,53 @@ function Gallery({
       masonryRef.current?.destroy();
       resizeObserverRef.current?.disconnect();
       masonryRef.current = new Masonry(galleryRef.current, {
-          itemSelector: '.gallery-tile',
-          columnWidth: '.gallery-tile',
-          percentPosition: false,
-          fitWidth: true,
-          horizontalOrder: true,
-          gutter: '.gallery-gutter',
-          transitionDuration: '0.15s',
-        });
-      imagesLoaded(galleryRef.current, function() {
-        masonryRef.current?.layout();
-
-        resizeObserverRef.current = new ResizeObserver(() => {
-          masonryRef.current?.layout();
-        });
-        resizeObserverRef.current.observe(galleryRef.current);
-
-        //On init, if there's a selected image scroll it into view.
-        //This is here because it needs to wait for images to load and layout to finish.
-        const selectedId = new URLSearchParams(window.location.search).get('photo');
-        if (selectedId) {
-          document.querySelector(`[data-photo-id="${selectedId}"`)?.scrollIntoView({block: 'center', behavior: 'instant'});
-        }
+        itemSelector: '.gallery-tile',
+        columnWidth: '.gallery-tile',
+        percentPosition: false,
+        fitWidth: true,
+        horizontalOrder: true,
+        gutter: '.gallery-gutter',
+        transitionDuration: '0.15s',
       });
+      resizeObserverRef.current = new ResizeObserver(() => {
+        masonryRef.current?.layout();
+      });
+      resizeObserverRef.current.observe(galleryRef.current);
+
+      //On init, if there's a selected image scroll it into view.
+      //This is here because it needs to wait for images to load and layout to finish.
+      const selectedId = new URLSearchParams(window.location.search).get('photo');
+      if (selectedId) {
+        document.querySelector(`[data-photo-id="${selectedId}"`)?.scrollIntoView({block: 'center', behavior: 'instant'});
+      }
     }
     else if (tilesAddedCount > 0) {
 
       const tilesPrepended = galleryTiles[0] !== masonryKnownGalleryTiles.current[0];
       const newTiles = tilesPrepended ? galleryTiles.slice(0, tilesAddedCount) : galleryTiles.slice(-tilesAddedCount);
 
-      imagesLoaded(newTiles, function() {
-        if (tilesPrepended) {
-          //Prepend pushes current items down. Compensate by scrolling the first pre-existing item back to where it was
-          const firstKnownMasonryItem = masonryRef.current?.items?.find(i => i.element === firstKnownTile);
-          const prevY = firstKnownMasonryItem?.position?.y;
-          
-          //Make the prepend instant so that animations don't clash with scroll adjustment
-          const oldTransition = masonryRef.current?.options?.transitionDuration;
-          masonryRef.current.options.transitionDuration = 0;
+      if (tilesPrepended) {
+        //Prepend pushes current items down. Compensate by scrolling the first pre-existing item back to where it was
+        const firstKnownMasonryItem = masonryRef.current?.items?.find(i => i.element === firstKnownTile);
+        const prevY = firstKnownMasonryItem?.position?.y;
+        
+        //Make the prepend instant so that animations don't clash with scroll adjustment
+        const oldTransition = masonryRef.current?.options?.transitionDuration;
+        masonryRef.current.options.transitionDuration = 0;
 
-          masonryRef.current?.prepended(newTiles);
-          masonryRef.current?.layout();
+        masonryRef.current?.prepended(newTiles);
+        masonryRef.current?.layout();
 
-          masonryRef.current.options.transitionDuration = oldTransition;
+        masonryRef.current.options.transitionDuration = oldTransition;
 
-          const newY = firstKnownMasonryItem?.position?.y;
-          if(prevY != null && newY != null) {
-            window.scrollBy({top: newY - prevY, behavior: 'instant'});
-          }
-        } else {
-          masonryRef.current?.appended(newTiles);
-          masonryRef.current?.layout();
+        const newY = firstKnownMasonryItem?.position?.y;
+        if(prevY != null && newY != null) {
+          window.scrollBy({top: newY - prevY, behavior: 'instant'});
         }
-      });
+      } else {
+        masonryRef.current?.appended(newTiles);
+        masonryRef.current?.layout();
+      }
     }
 
     masonryKnownGalleryTiles.current = [...galleryTiles];
