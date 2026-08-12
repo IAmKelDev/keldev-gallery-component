@@ -25,7 +25,7 @@
   grid-area: stack;
   z-index: 2;
   opacity: 0;
-  transition: opacity 0.15s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .gallery-tile-description p {
@@ -56,6 +56,12 @@
   width: 100%;
   height: auto;
   display: block;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.gallery-tile-image.is-loaded {
+  opacity: 1;
 }
 
 .gallery-tile-tags {
