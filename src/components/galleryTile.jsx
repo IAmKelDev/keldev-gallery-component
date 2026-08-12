@@ -1,5 +1,6 @@
 import { thumbHashToDataURL } from 'thumbhash';
 import './galleryTile.css';
+import { useState } from 'react';
 
 export default function GalleryTile({ photoMeta, onClickContent, photosPrefix}) {
     const derivative = photoMeta.derivatives?.[1];
@@ -13,6 +14,8 @@ export default function GalleryTile({ photoMeta, onClickContent, photosPrefix}) 
     } else {
         console.warn(`Missing/invalid derivative dimensions for photo ${photoMeta.id}`, photoMeta);
     }
+
+    const [isLoaded, setIsLoaded] = useState(false);
 
     return (
         <>
@@ -28,7 +31,9 @@ export default function GalleryTile({ photoMeta, onClickContent, photosPrefix}) 
             </div>
             <div className="gallery-tile-image-container">
                 <img 
-                    className="gallery-tile-image"
+                    onLoad={() => setIsLoaded(true)}
+                    onError={() => setIsLoaded(true)}
+                    className={`gallery-tile-image${isLoaded ? ' is-loaded' : ''}`}
                     srcSet={`
                     ${photosPrefix}${derivative?.filename},
                     ${thumbHashToDataURL(Uint8Array.from(atob(photoMeta.thumbhash), c => c.charCodeAt(0)))}

@@ -1,40 +1,18 @@
 import './imageModal.css';
 
-import { useEffect, useRef, useState } from 'react';
-import imagesLoaded from 'imagesloaded';
+import { useState, useEffect } from 'react';
 
 export default function ImageModal({ photoMeta, photosPrefix, onClose }) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => setIsLoaded(false), [photoMeta?.id]);
+  
   if (!photoMeta) return null;
 
-  const fullSizeFilename = photoMeta.derivatives?.[photoMeta.derivatives.length - 1]?.filename;
+  const derivative = photoMeta.derivatives?.[photoMeta.derivatives.length - 1]
+  const fullSizeFilename = derivative?.filename;
   const fullSizeUrl = fullSizeFilename ? `${photosPrefix}${fullSizeFilename}` : null;
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
-  const imgRef = useRef(null);
-
-  useEffect(() => {
-    setIsLoading(true);
-  }, [fullSizeUrl]);
-
-  useEffect(() => {
-    if (!fullSizeUrl) {
-      setIsLoading(false);
-      return;
-    }
-
-    const el = imgRef.current;
-    if (!el) return;
-
-    const il = imagesLoaded(el, () => setIsLoading(false));
-    return () => {
-      try {
-        il.off('always');
-      } catch {
-        // ignore
-      }
-    };
-  }, [fullSizeUrl]);
 
   const catchClick = (e) => {e.stopPropagation()};
 
@@ -50,10 +28,17 @@ export default function ImageModal({ photoMeta, photosPrefix, onClose }) {
     <div className="image-modal" onClick={onClose}>
       <div className="image-modal-content">
         <div className="image-modal-main-content" onClick={catchClick}>
-            {isLoading && <p>Loading…</p>}
-            {fullSizeUrl && <img ref={imgRef} src={fullSizeUrl} alt="Image Modal" />}
+            { fullSizeUrl &&
+              <img
+                onLoad={() => setIsLoaded(true)}
+                onError={() => setIsLoaded(true)}
+                className={`image-modal-image${isLoaded ?' is-loaded' : ''}`}
+                src={fullSizeUrl}
+                alt={`Modal: ${photoMeta.title}`}
+                />
+            }
         </div>
-        {!isLoading && <div className="image-modal-info-card" onClick={catchClick}>
+        <div className="image-modal-info-card" onClick={catchClick}>
           <h3 className="image-modal-info-card-title">{photoMeta.title}</h3>
           <p className="image-modal-info-card-description">{photoMeta.description}</p>
           <p className="image-modal-info-card-description">{new Date(photoMeta.taken_at).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'})}</p>
@@ -76,7 +61,7 @@ export default function ImageModal({ photoMeta, photosPrefix, onClose }) {
               </a>
             )}
           </div>
-        </div>}
+        </div>
       </div>
     </div>
   );

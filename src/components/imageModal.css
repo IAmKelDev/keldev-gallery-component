@@ -23,7 +23,7 @@
   max-height: 100%;
 }
 
-.image-modal-main-content img {
+.image-modal-image {
   display: block;
   max-width: 60vw;
   max-height: 95vh;
@@ -31,6 +31,12 @@
   border: 0.2rem solid #888888;
   border-radius: 0.1rem;
   background-color: #888888;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.image-modal-image.is-loaded {
+  opacity: 1;
 }
 
 .image-modal-main-content p {
@@ -51,7 +57,6 @@
   border: 0.2rem solid #303030;
   border-radius: 0.1rem;
   color: white;
-  overflow: auto;
 }
 
 .image-modal-info-card-title {
