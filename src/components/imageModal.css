@@ -57,6 +57,7 @@
   border: 0.2rem solid #303030;
   border-radius: 0.1rem;
   color: white;
+  overflow: auto;
 }
 
 .image-modal-info-card-title {
@@ -69,7 +70,8 @@
 }
 
 .image-modal-info-card-options a {
-  padding: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
   cursor: pointer;
 }
 
