@@ -47,7 +47,6 @@
 .image-modal-info-card {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   max-height: 95vh;
   max-width: 10vw;
   min-width: 20%;
@@ -83,17 +82,19 @@
   .image-modal-content {
     flex-direction: column;
     padding-left: 0;
+    margin-left: 0.5rem;
   }
 
   .image-modal-main-content img {
-    max-width: 90vw;
+    max-width: 95vw;
     max-height: 60vh;
   }
 
   .image-modal-info-card {
-    max-width: 90vw;
+    max-width: 95vw;
     max-height: 40vh;
     margin-top: 1vh;
+    margin-left: 0;
     padding: 0.25rem;
   }
 }
